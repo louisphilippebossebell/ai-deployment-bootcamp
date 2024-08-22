@@ -57,7 +57,6 @@ else
 fi
 
 echo "Deployed Endpoint ID: $ENDPOINT_ID"
-sed -i "s/^endpoint =.*/endpoint = \"$ENDPOINT_ID\"/" reference_implementations/gcp/architectures/terraform.tfvars
 # Optional: Test the Endpoint
 # Uncomment the following line to test the endpoint with the known ENDPOINT_ID
 python -m test_endpoint "inputs/llama3.1.json" $ENDPOINT_ID
