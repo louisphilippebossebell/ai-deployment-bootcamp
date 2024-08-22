@@ -10,6 +10,7 @@ region = "us-central1"
 publickeypath = "~/.ssh/id_rsa.pub"
 schemas_folder = "../../schemas"
 endpoint = ""
+<<<<<<< HEAD
 model = "llama3.1"
 team_members = [
     "arooj_ahmed.qureshi@bell.ca",
@@ -19,3 +20,6 @@ team_members = [
     "louisphilippe.bosse@bell.ca",
     "hadi.abdi_ghavidel@bell.ca"
 ]
+=======
+model = "llama3.1"
+>>>>>>> 4b89942 (add a startup to ml online)
