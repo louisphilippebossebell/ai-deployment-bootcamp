@@ -442,6 +442,16 @@ resource "google_service_account_iam_binding" "act_as_permission" {
 }
 
 locals {
+  # Create a map of usernames with the email as the key for easy reference
+  usernames = { for email in var.team_members : email => split("@", email)[0] }
+}
+
+locals {
+  # Create shortened identifiers for each team member
+  shortened_team_members = { for email, username in local.usernames : email => "${substr(username, 0, 1)}${substr(split(".", username)[1], 0, 1)}@service-account.com" }
+}
+
+locals {
   team_info = { for email in var.team_members : email => {
     email = email,
     username = lower(replace(replace(split("@", email)[0], ".", "-"), "_", "-")),
