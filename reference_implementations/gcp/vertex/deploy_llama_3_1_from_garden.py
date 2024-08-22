@@ -18,7 +18,7 @@ model_name = f"llama3.1-{TFVARS['env']}"
 if model_id is not None:
     model = aiplatform.Model(f"projects/{PROJECT_NUMBER}/locations/{TFVARS['region']}/models/{model_id}@{model_version}")
 else:
-    model_path = f"gs://{TFVARS['project']}-{TFVARS['env']}-model/llama-garden/llama3.1/Meta-Llama-3.1-8B"
+    model_path = f"gs://{TFVARS['project']}-{TFVARS['env']}-model/llama-garden/llama3.1/Meta-Llama-3.1-8B-Instruct"
     vllm_args = [
         "python",
         "-m",
