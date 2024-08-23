@@ -424,26 +424,35 @@ resource "google_compute_address" "static" {
 }
 
 resource "google_service_account_iam_binding" "act_as_permission" {
-  service_account_id = "projects/${var.project}/serviceAccounts/${var.user}"
+  service_account_id = "projects/${var.project}/serviceAccounts/${google_service_account.sa.email}"
   role               = "roles/iam.serviceAccountUser"
   members            = [for member in var.team_members : "user:${member}"]
 }
 
 locals {
-  # Create a map of usernames with the email as the key for easy reference
-  usernames = { for email in var.team_members : email => split("@", email)[0] }
+  team_info = { for email in var.team_members : email => {
+    email = email,
+    username = lower(replace(replace(split("@", email)[0], ".", "-"), "_", "-")),
+    shortened = "${var.short_project_prefix}-${substr(replace(split("@", email)[0], ".", "-"), 0, 1)}${
+      length(split("-", replace(split("@", email)[0], ".", "-"))) > 1 ? 
+      substr(split("-", replace(split("@", email)[0], ".", "-"))[1], 0, 1) : 
+      ""}-${substr(md5(email), 0, 6)}"
+  }}
 }
 
-locals {
-  # Create shortened identifiers for each team member
-  shortened_team_members = { for email, username in local.usernames : email => "${substr(username, 0, 1)}${substr(split(".", username)[1], 0, 1)}@service-account.com" }
+resource "google_service_account" "bci" {
+  for_each = local.team_info
+
+  account_id   = each.value.shortened
+  display_name = "Service Account for ${each.key}"
+  project      = var.project
 }
 
 resource "google_workbench_instance" "instance" {
-  for_each = local.shortened_team_members
+  for_each = local.team_info
 
   # Adjusted to use a descriptive username. Assuming each.key is the username you want.
-  name     = "${var.short_project_prefix}-workbench-${each.key}"
+  name     = "${var.short_project_prefix}-workbench-${each.value.username}"
   location = "${var.region}-a"
   project  = var.project
 
@@ -463,22 +472,19 @@ resource "google_workbench_instance" "instance" {
     disable_public_ip = false
 
     service_accounts {
-      # Corrected to use the value from the iteration, which is the shortened email
-      email = each.value # Assuming each.value is already in the format "initials@service-account.com"
+      email = google_service_account.bci[each.key].email
     }
 
     boot_disk {
       disk_size_gb    = 310
       disk_type       = "PD_SSD"
-      disk_encryption = "CMEK"
-      kms_key         = "my-crypto-key"
+      disk_encryption = "GMEK"
     }
 
     data_disks {
       disk_size_gb    = 330
       disk_type       = "PD_SSD"
-      disk_encryption = "CMEK"
-      kms_key         = "my-crypto-key"
+      disk_encryption = "GMEK"
     }
 
     network_interfaces {
@@ -501,13 +507,17 @@ resource "google_workbench_instance" "instance" {
 
   disable_proxy_access = true
 
-  instance_owners = [each.value]
+  instance_owners = [each.key]
 
   labels = {
     project = var.project
-    env     = var.env
   }
 
+<<<<<<< HEAD
   desired_state = "ACTIVE"
 }
 >>>>>>> db9acda (Change a few things to shorten the SA name)
+=======
+  desired_state = "INACTIVE"
+}
+>>>>>>> 70290d2 (modify main.tf)
