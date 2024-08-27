@@ -448,16 +448,52 @@ locals {
     shortened = "${var.short_project_prefix}-${substr(replace(split("@", email)[0], ".", "-"), 0, 1)}${
       length(split("-", replace(split("@", email)[0], ".", "-"))) > 1 ? 
       substr(split("-", replace(split("@", email)[0], ".", "-"))[1], 0, 1) : 
-      ""}-${substr(md5(email), 0, 6)}"
+      ""}"
   }}
 }
 
-resource "google_service_account" "bci" {
-  for_each = local.team_info
+resource "google_service_account_iam_binding" "aj_sa_binding" {
+  service_account_id = google_service_account.aj_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  members            = [
+    "user:arooj_ahmed.qureshi@bell.ca",
+    "user:louisphilippe.bosse@bell.ca"
+  ]
+}
 
-  account_id   = each.value.shortened
-  display_name = "Service Account for ${each.key}"
-  project      = var.project
+resource "google_service_account_iam_binding" "my_sa_binding" {
+  service_account_id = google_service_account.my_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  members            = [
+    "user:mingchen.yang@bell.ca",
+    "user:louisphilippe.bosse@bell.ca"
+  ]
+}
+
+resource "google_service_account_iam_binding" "db_sa_binding" {
+  service_account_id = google_service_account.db_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  members            = [
+    "user:daniel.bucci@bell.ca",
+    "user:louisphilippe.bosse@bell.ca"
+  ]
+}
+
+resource "google_service_account_iam_binding" "co_sa_binding" {
+  service_account_id = google_service_account.co_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  members            = [
+    "user:chike.odenigbo@bell.ca",
+    "user:louisphilippe.bosse@bell.ca"
+  ]
+}
+
+resource "google_service_account_iam_binding" "lb_sa_binding" {
+  service_account_id = google_service_account.lb_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  members            = [
+    "user:louisphilippe.bosse@bell.ca"
+  ]
 }
 
 locals {

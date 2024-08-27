@@ -10,7 +10,6 @@ region = "us-central1"
 publickeypath = "~/.ssh/id_rsa.pub"
 schemas_folder = "../../schemas"
 endpoint = ""
-<<<<<<< HEAD
 model = "llama3.1"
 team_members = [
     "arooj_ahmed.qureshi@bell.ca",
