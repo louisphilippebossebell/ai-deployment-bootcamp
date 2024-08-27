@@ -1,6 +1,6 @@
 variable "region" {
   type = string
-} 
+}
 
 variable "project" {
   type = string
@@ -452,59 +452,25 @@ locals {
   }}
 }
 
-resource "google_service_account_iam_binding" "aj_sa_binding" {
-  service_account_id = google_service_account.aj_sa.name
-  role               = "roles/iam.serviceAccountUser"
-  members            = [
-    "user:arooj_ahmed.qureshi@bell.ca",
-    "user:louisphilippe.bosse@bell.ca"
-  ]
+variable "team_member_service_accounts" {
+  description = "Mapping of team members to their service account emails"
+  type        = map(string)
+  default     = {
+    "arooj_ahmed.qureshi" = "bci-aj-sa@bell-canada-inc.iam.gserviceaccount.com",
+    "mingchen.yang"       = "bci-my-sa@bell-canada-inc.iam.gserviceaccount.com",
+    "daniel.bucci"        = "bci-db-sa@bell-canada-inc.iam.gserviceaccount.com",
+    "chike.odenigbo"      = "bci-co-sa@bell-canada-inc.iam.gserviceaccount.com",
+    "louisphilippe.bosse" = "bci-lb-sa@bell-canada-inc.iam.gserviceaccount.com",
+    "hadi.abdi_ghavidel"  = "bci-ha-sa@bell-canada-inc.iam.gserviceaccount.com"
+  }
 }
 
-resource "google_service_account_iam_binding" "my_sa_binding" {
-  service_account_id = google_service_account.my_sa.name
-  role               = "roles/iam.serviceAccountUser"
-  members            = [
-    "user:mingchen.yang@bell.ca",
-    "user:louisphilippe.bosse@bell.ca"
-  ]
-}
+resource "google_project_iam_member" "service_account_user_role" {
+  for_each = var.team_member_service_accounts
 
-resource "google_service_account_iam_binding" "db_sa_binding" {
-  service_account_id = google_service_account.db_sa.name
-  role               = "roles/iam.serviceAccountUser"
-  members            = [
-    "user:daniel.bucci@bell.ca",
-    "user:louisphilippe.bosse@bell.ca"
-  ]
-}
-
-resource "google_service_account_iam_binding" "co_sa_binding" {
-  service_account_id = google_service_account.co_sa.name
-  role               = "roles/iam.serviceAccountUser"
-  members            = [
-    "user:chike.odenigbo@bell.ca",
-    "user:louisphilippe.bosse@bell.ca"
-  ]
-}
-
-resource "google_service_account_iam_binding" "lb_sa_binding" {
-  service_account_id = google_service_account.lb_sa.name
-  role               = "roles/iam.serviceAccountUser"
-  members            = [
-    "user:louisphilippe.bosse@bell.ca"
-  ]
-}
-
-locals {
-  team_info = { for email in var.team_members : email => {
-    email = email,
-    username = lower(replace(replace(split("@", email)[0], ".", "-"), "_", "-")),
-    shortened = "${var.short_project_prefix}-${substr(replace(split("@", email)[0], ".", "-"), 0, 1)}${
-      length(split("-", replace(split("@", email)[0], ".", "-"))) > 1 ? 
-      substr(split("-", replace(split("@", email)[0], ".", "-"))[1], 0, 1) : 
-      ""}"
-  }}
+  project = var.project
+  role    = "roles/iam.serviceAccountUser"
+  member  = "serviceAccount:${each.value}"
 }
 
 resource "google_service_account_iam_binding" "aj_sa_binding" {

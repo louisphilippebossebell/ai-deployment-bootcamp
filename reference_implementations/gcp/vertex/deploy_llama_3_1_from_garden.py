@@ -48,12 +48,7 @@ else:
         serving_container_environment_variables=env_vars,
     )
 
-service_account = create_service_account_with_roles(
-    account_id=f"{TFVARS['short_project_prefix']}-{TFVARS['shortened_user_name']}-llama-sa",
-    account_display_name=f"{TFVARS['project']}-{TFVARS['shortened_user_name']} Llama Endpoint Service Account",
-    project_id=TFVARS["project"],
-    roles=["roles/aiplatform.user", "roles/storage.objectViewer"],
-)
+service_account = f"{TFVARS['short_project_prefix']}-{TFVARS['shortened_user_name']}-sa@{TFVARS['project']}.iam.gserviceaccount.com"
 
 endpoint = aiplatform.Endpoint.create(display_name=f"{TFVARS['project']}-{TFVARS['env']}-llama-garden-endpoint")
 
@@ -68,7 +63,7 @@ model.deploy(
     accelerator_type="NVIDIA_L4",
     accelerator_count=1,
     deploy_request_timeout=1800,
-    service_account=service_account.email,
+    service_account=service_account,
 )
 print("Model name:", model_name)
 print("Endpoint ID:", endpoint.name)
